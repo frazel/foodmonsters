@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FoodMonsters NFT Leaderboard</title>
+  <title>FoodMonsters Dodge Game</title>
   <link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
   <style>
     html, body {
@@ -141,19 +141,19 @@
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
-  <div id="gameScore">🍔 Score: 0</div>
+  <div id="gameScore">🍟 Score: 0</div>
 
   <header>
     <img src="https://i.imgur.com/Xveg60R.png" alt="FoodMonsters Logo">
-    <h1>🍕 FoodMonsters NFT Leaderboard 🍔</h1>
-    <p>Top Tastebud Titans</p>
+    <h1>🍽️ FoodMonsters Dodge the Fry Samurai 🍟</h1>
+    <p>Avoid the falling fries!</p>
   </header>
 
   <main>
     <section id="leaderboard">
       <h2>Top 100 FoodMonsters Collectors</h2>
       <button class="download-btn" onclick="downloadCSV()">📥 Download CSV</button>
-      <ol id="leaderboard-list"><li>Serving up fresh stats...</li></ol>
+      <ol id="leaderboard-list"><li>Loading leaderboard...</li></ol>
     </section>
   </main>
 
@@ -226,7 +226,7 @@
 
     fetchLeaderboard();
 
-    // 🎮 Mini Game Logic
+    // 🎮 Game Setup: Dodge falling Fry Samurais
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     let width, height;
@@ -242,46 +242,49 @@
     resizeCanvas();
 
     let plateX = width / 2;
-    const plateWidth = 80;
+    const plateWidth = 60;
     let score = 0;
-    let food = [];
-    const foodEmojis = ["🍕", "🍔", "🍩", "🍟", "🌭"];
+    let fryImg = new Image();
+    fryImg.src = "https://i.imgur.com/Xveg60R.png";
+
+    let fryRain = [];
 
     document.addEventListener("keydown", e => {
-      if (e.key === "ArrowLeft") plateX -= 30;
-      if (e.key === "ArrowRight") plateX += 30;
+      if (e.key === "ArrowLeft") plateX -= 40;
+      if (e.key === "ArrowRight") plateX += 40;
     });
 
     document.addEventListener("mousemove", e => {
       plateX = e.clientX - plateWidth / 2;
     });
 
-    function spawnFood() {
-      if (Math.random() < 0.05) {
-        food.push({
-          x: Math.random() * (width - 40),
-          y: -30,
-          emoji: foodEmojis[Math.floor(Math.random() * foodEmojis.length)],
-          speed: 2 + Math.random() * 2
+    function spawnFry() {
+      if (Math.random() < 0.07) {
+        fryRain.push({
+          x: Math.random() * (width - 60),
+          y: -40,
+          speed: 2 + score * 0.1
         });
       }
     }
 
-    function drawFood() {
-      for (let i = 0; i < food.length; i++) {
-        const f = food[i];
-        ctx.font = "32px serif";
-        ctx.fillText(f.emoji, f.x, f.y);
-        f.y += f.speed;
+    function drawFry() {
+      for (let i = 0; i < fryRain.length; i++) {
+        const fry = fryRain[i];
+        ctx.drawImage(fryImg, fry.x, fry.y, 40, 40);
+        fry.y += fry.speed;
 
-        if (f.y > height - 40 && f.x > plateX && f.x < plateX + 60) {
-          food.splice(i, 1);
+        // Hit detection
+        if (fry.y > height - 60 && fry.x > plateX && fry.x < plateX + 60) {
+          fryRain = []; // Clear all fries
+          score = 0;
+          document.getElementById("gameScore").innerText = `🍟 Score: 0`;
+          i--;
+        } else if (fry.y > height) {
+          fryRain.splice(i, 1);
+          i--;
           score++;
-          document.getElementById("gameScore").innerText = `🍔 Score: ${score}`;
-          i--;
-        } else if (f.y > height) {
-          food.splice(i, 1);
-          i--;
+          document.getElementById("gameScore").innerText = `🍟 Score: ${score}`;
         }
       }
     }
@@ -293,8 +296,8 @@
 
     function gameLoop() {
       ctx.clearRect(0, 0, width, height);
-      spawnFood();
-      drawFood();
+      spawnFry();
+      drawFry();
       drawPlate();
       requestAnimationFrame(gameLoop);
     }
@@ -303,5 +306,6 @@
   </script>
 </body>
 </html>
+
 
 
