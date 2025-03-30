@@ -1,3 +1,4 @@
+<!-- BEGIN UPDATED GAME CODE -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -261,7 +262,6 @@
 
     fetchLeaderboard();
 
-    // Game Logic
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     let width, height;
@@ -316,7 +316,7 @@
         ctx.font = "32px serif";
         ctx.fillText(f.emoji, f.x, f.y);
         f.y += f.speed;
-        if (f.y > height - 60 && f.x > plateX && f.x < plateX + plateWidth) {
+        if (f.y > height - 110 && f.x > plateX && f.x < plateX + plateWidth) {
           score++;
           foodDrops.splice(i, 1);
           document.getElementById("gameScore").innerText = `🍽️ Score: ${score}`;
@@ -331,9 +331,9 @@
     function drawFries() {
       for (let i = 0; i < fryDrops.length; i++) {
         const f = fryDrops[i];
-        ctx.drawImage(fryImg, f.x, f.y, 40, 40);
+        ctx.drawImage(fryImg, f.x, f.y, 60, 60); // bigger fries!
         f.y += f.speed;
-        if (f.y > height - 60 && f.x > plateX && f.x < plateX + plateWidth) {
+        if (f.y > height - 110 && f.x > plateX && f.x < plateX + plateWidth) {
           resetScore();
         } else if (f.y > height) {
           fryDrops.splice(i, 1);
@@ -344,7 +344,7 @@
 
     function drawPlate() {
       ctx.font = "60px serif";
-      ctx.fillText("🍽️", plateX, height - 10);
+      ctx.fillText("🍽️", plateX, height - 60); // raised plate
     }
 
     function gameLoop() {
@@ -389,6 +389,8 @@
   </script>
 </body>
 </html>
+<!-- END -->
+
 
 
 
