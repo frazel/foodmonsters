@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodMonsters Leaderboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Luckiest Guy', cursive;
+      background: linear-gradient(135deg, #111, #222);
+      color: #fff;
+      overflow-x: hidden;
+    }
+    header, footer {
+      text-align: center;
+      padding: 2rem;
+      background-color: #1a1a1a;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    header h1 {
+      font-size: 3rem;
+      color: #ffde59;
+      text-shadow: 2px 2px 4px #000;
+    }
+    #login-buttons button {
+      background-color: #ff4f4f;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      margin: 0.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    #login-buttons button:hover {
+      transform: scale(1.05);
+    }
+    main {
+      padding: 2rem;
+      text-align: center;
+    }
+    #leaderboard-list {
+      max-width: 600px;
+      margin: 2rem auto;
+      list-style: none;
+      padding: 0;
+      text-align: left;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #leaderboard-list li {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    #leaderboard-list li:nth-child(odd) {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+    footer {
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    .sprite {
+      position: absolute;
+      width: 80px;
+      animation: float 8s ease-in-out infinite;
+      z-index: 0;
+    }
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-30px); }
+      100% { transform: translateY(0); }
+    }
+  </style>
+  <script src="https://unpkg.com/@waxio/waxjs/dist/waxjs.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/anchor-link@3.0.1/dist/anchor-link.min.js"></script>
+</head>
+<body>
+  <img src="https://media.tenor.com/3D1Twn7TxMQAAAAi/burger-dance.gif" class="sprite" style="top: 50px; left: 30px;">
+  <img src="https://media.tenor.com/CWnBCV_ogygAAAAi/pizza-dancing.gif" class="sprite" style="top: 150px; right: 40px;">
+  <img src="https://media.tenor.com/XmW9GpECLo8AAAAi/donut-happy.gif" class="sprite" style="bottom: 80px; left: 100px;">
+
+  <header>
+    <h1>🍕 FoodMonsters Top Holders 🍔</h1>
+    <p>Connect your WAX wallet to see where you stand among the top 100 holders!</p>
+    <div id="login-buttons">
+      <button onclick="loginWithWAX()">Login with WAX Cloud Wallet</button>
+      <button onclick="loginWithAnchor()">Login with Anchor</button>
+    </div>
+    <p id="user"></p>
+  </header>
+
+  <main>
+    <section id="leaderboard">
+      <h2>Top 100 FoodMonsters Holders</h2>
+      <ol id="leaderboard-list"></ol>
+    </section>
+  </main>
+
+  <footer>
+    <p>Made with 🍟 and ❤️ by FoodMonsters</p>
+  </footer>
+
+  <script>
+    const wax = new waxjs.WaxJS({ rpcEndpoint: 'https://wax.greymass.com' });
+    let link;
+
+    async function loginWithWAX() {
+      try {
+        const userAccount = await wax.login();
+        document.getElementById('user').innerText = `Logged in as: ${userAccount}`;
+      } catch (err) {
+        console.error('WAX login failed', err);
+      }
+    }
+
+    async function loginWithAnchor() {
+      link = new AnchorLink({
+        transport: new AnchorLinkBrowserTransport(),
+        chains: [{
+          chainId: '1064487b3cd1a8976c8f441f17c6e3b2b3a8dcb4969cbb28c8f1ef5e8f7fd130',
+          nodeUrl: 'https://wax.greymass.com'
+        }]
+      });
+
+      try {
+        const result = await link.login('foodmonsters');
+        document.getElementById('user').innerText = `Logged in as: ${result.session.auth.actor}`;
+      } catch (err) {
+        console.error('Anchor login failed', err);
+      }
+    }
+
+    async function fetchLeaderboard() {
+      const response = await fetch('https://wax.api.atomicassets.io/atomicassets/v1/assets?collection_name=foodmonsters&limit=1000');
+      const data = await response.json();
+      const holders = {};
+
+      data.data.forEach(asset => {
+        const owner = asset.owner;
+        if (holders[owner]) holders[owner]++;
+        else holders[owner] = 1;
+      });
+
+      const sorted = Object.entries(holders)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 100);
+
+      const list = document.getElementById('leaderboard-list');
+      sorted.forEach(([owner, count], index) => {
+        const li = document.createElement('li');
+        li.textContent = `#${index + 1} - ${owner} (${count} NFTs)`;
+        list.appendChild(li);
+      });
+    }
+
+    fetchLeaderboard();
+  </script>
+</body>
+</html>
