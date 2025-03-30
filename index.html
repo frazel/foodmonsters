@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FoodMonsters Leaderboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
   <style>
     body {
@@ -78,8 +76,8 @@
 
       data.data.forEach(asset => {
         const owner = asset.owner;
-        if (holders[owner]) holders[owner]++;
-        else holders[owner] = 1;
+        if (!owner || owner === 'null' || owner.trim() === '') return;
+        holders[owner] = (holders[owner] || 0) + 1;
       });
 
       const sorted = Object.entries(holders)
@@ -87,6 +85,8 @@
         .slice(0, 100);
 
       const list = document.getElementById('leaderboard-list');
+      list.innerHTML = '';
+
       sorted.forEach(([owner, count], index) => {
         const li = document.createElement('li');
         li.textContent = `#${index + 1} - ${owner} (${count} NFTs)`;
