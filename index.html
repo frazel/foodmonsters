@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FoodMonsters NFT Leaderboard</title>
-  <link href="https://fonts.googleapis.com/css22?family=Chewy&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
   <style>
     html, body {
       margin: 0;
@@ -12,7 +12,6 @@
       color: #fffbea;
       background-color: #121212;
       overflow-x: hidden;
-      scroll-behavior: smooth;
       cursor: url('https://cur.cursors-4u.net/food/foo-6/foo520.cur'), auto;
     }
 
@@ -21,37 +20,17 @@
       background-size: 400px;
     }
 
-    body::after {
-      content: '';
+    canvas#gameCanvas {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: url('https://i.imgur.com/pDnpPSf.gif') repeat;
-      opacity: 0.1;
-      pointer-events: none;
+      top: 0;
+      left: 0;
       z-index: 0;
-      animation: foodGlitter 20s linear infinite;
-    }
-
-    @keyframes foodGlitter {
-      0% { opacity: 0.07; }
-      50% { opacity: 0.12; }
-      100% { opacity: 0.07; }
-    }
-
-    @keyframes bounce {
-      0% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-      100% { transform: translateY(0); }
-    }
-
-    .emoji {
-      display: inline-block;
-      animation: bounce 0.5s infinite ease-in-out alternate;
+      pointer-events: none;
     }
 
     header, footer {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       text-align: center;
       padding: 2rem;
       background-color: rgba(255, 184, 77, 0.9);
@@ -76,7 +55,7 @@
 
     main {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       padding: 2rem;
       text-align: center;
     }
@@ -128,19 +107,9 @@
       transform: translateY(-2px);
     }
 
-    a {
-      color: #ffeecb;
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    a:hover {
-      text-decoration: underline;
-      color: #ffffff;
-    }
-
     footer {
       font-size: 0.9rem;
+      z-index: 2;
     }
 
     footer a {
@@ -155,9 +124,24 @@
       text-decoration: underline;
       color: #fff;
     }
+
+    #gameScore {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 3;
+      font-size: 1.2rem;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 0.6rem 1rem;
+      border-radius: 12px;
+      color: #ffd84f;
+    }
   </style>
 </head>
 <body>
+  <canvas id="gameCanvas"></canvas>
+  <div id="gameScore">🍔 Score: 0</div>
+
   <header>
     <img src="https://i.imgur.com/Xveg60R.png" alt="FoodMonsters Logo">
     <h1>🍕 FoodMonsters NFT Leaderboard 🍔</h1>
@@ -207,17 +191,17 @@
 
         if (index === 0) {
           medal = '👑 ';
-          emoji = '<span class="emoji">🍕</span>';
+          emoji = '🍕';
         } else if (index === 1) {
           medal = '🥈 ';
-          emoji = '<span class="emoji">🍔</span>';
+          emoji = '🍔';
         } else if (index === 2) {
           medal = '🥉 ';
-          emoji = '<span class="emoji">🍩</span>';
+          emoji = '🍩';
         }
 
         const link = `https://wax.atomichub.io/profile/${entry.account}`;
-        li.innerHTML = `${medal}${emoji} #${index + 1} - <a href="${link}" target="_blank">${entry.account}</a> (${entry.assets} NFTs)`;
+        li.innerHTML = `${medal}${emoji ? `<span class="emoji">${emoji}</span>` : ''} #${index + 1} - <a href="${link}" target="_blank">${entry.account}</a> (${entry.assets} NFTs)`;
         list.appendChild(li);
       });
     }
@@ -240,6 +224,82 @@
     }
 
     fetchLeaderboard();
+
+    // 🎮 Mini Game Logic 🍔
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    let width, height;
+
+    function resizeCanvas() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let plateX = width / 2;
+    const plateWidth = 100;
+    const plateHeight = 20;
+    let score = 0;
+    let food = [];
+    const foodEmojis = ["🍕", "🍔", "🍩", "🍟", "🌭"];
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft") plateX -= 30;
+      if (e.key === "ArrowRight") plateX += 30;
+    });
+
+    function spawnFood() {
+      if (Math.random() < 0.05) {
+        food.push({
+          x: Math.random() * (width - 40),
+          y: -30,
+          emoji: foodEmojis[Math.floor(Math.random() * foodEmojis.length)],
+          speed: 2 + Math.random() * 2
+        });
+      }
+    }
+
+    function drawFood() {
+      for (let i = 0; i < food.length; i++) {
+        const f = food[i];
+        ctx.font = "32px serif";
+        ctx.fillText(f.emoji, f.x, f.y);
+        f.y += f.speed;
+
+        // Collision with plate
+        if (f.y > height - plateHeight - 10 && f.x > plateX && f.x < plateX + plateWidth) {
+          food.splice(i, 1);
+          score++;
+          document.getElementById("gameScore").innerText = `🍔 Score: ${score}`;
+          i--;
+        }
+
+        // Missed food
+        else if (f.y > height) {
+          food.splice(i, 1);
+          i--;
+        }
+      }
+    }
+
+    function drawPlate() {
+      ctx.fillStyle = "#fcbf49";
+      ctx.fillRect(plateX, height - plateHeight, plateWidth, plateHeight);
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, width, height);
+      spawnFood();
+      drawFood();
+      drawPlate();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
   </script>
 </body>
 </html>
