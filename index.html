@@ -137,11 +137,70 @@
       border-radius: 12px;
       color: #ffd84f;
     }
+
+    #localLeaderboard {
+      position: fixed;
+      top: 80px;
+      right: 1rem;
+      z-index: 3;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 1rem;
+      border-radius: 12px;
+      color: #ffd84f;
+      font-size: 1rem;
+      max-width: 200px;
+    }
+
+    #localLeaderboard ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #nameModal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #nameModal input {
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      border: none;
+      margin: 10px;
+      text-align: center;
+    }
+
+    #nameModal button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #fcbf49;
+      color: #4a3200;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
+  <div id="nameModal">
+    <h2>Enter Your Name to Start</h2>
+    <input id="playerName" placeholder="Your Name"/>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+
   <canvas id="gameCanvas"></canvas>
   <div id="gameScore">🍽️ Score: 0</div>
+  <div id="localLeaderboard">
+    <h3>🏆 Local Scores</h3>
+    <ul id="localScores"></ul>
+  </div>
 
   <header>
     <img src="https://i.imgur.com/Xveg60R.png" alt="FoodMonsters Logo">
@@ -163,7 +222,7 @@
   </footer>
 
   <script>
-    // Leaderboard logic
+    let player = "";
     const blacklist = ["waxdaofarmer", "waxdaomarket", "wombatmaster", "nfthivepacks","blend.nefty", "swap.taco", "scurvybot.gm", "swap.alcor", "neftyblocksp", "neftyblocksd","wallet.taco", "waxportalbot", "x", "wallets", "dig.sb"];
     let leaderboardData = [];
 
@@ -202,14 +261,13 @@
 
     fetchLeaderboard();
 
-    // Game logic
+    // Game Logic
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     let width, height;
     let score = 0;
     let plateX = 300;
     const plateWidth = 60;
-
     const foodEmojis = ["🍕", "🍔", "🍩", "🌭", "🍟"];
     const foodDrops = [];
     const fryDrops = [];
@@ -243,7 +301,6 @@
           speed: 2 + score * 0.05
         });
       }
-
       if (Math.random() < 0.02 + score * 0.0015) {
         fryDrops.push({
           x: Math.random() * (width - 40),
@@ -259,7 +316,6 @@
         ctx.font = "32px serif";
         ctx.fillText(f.emoji, f.x, f.y);
         f.y += f.speed;
-
         if (f.y > height - 60 && f.x > plateX && f.x < plateX + plateWidth) {
           score++;
           foodDrops.splice(i, 1);
@@ -277,12 +333,8 @@
         const f = fryDrops[i];
         ctx.drawImage(fryImg, f.x, f.y, 40, 40);
         f.y += f.speed;
-
         if (f.y > height - 60 && f.x > plateX && f.x < plateX + plateWidth) {
-          score = 0;
-          fryDrops.length = 0;
-          foodDrops.length = 0;
-          document.getElementById("gameScore").innerText = `🍽️ Score: 0`;
+          resetScore();
         } else if (f.y > height) {
           fryDrops.splice(i, 1);
           i--;
@@ -304,10 +356,40 @@
       requestAnimationFrame(gameLoop);
     }
 
-    gameLoop();
+    function updateLocalLeaderboard() {
+      let scores = JSON.parse(localStorage.getItem("foodmonScores") || "[]");
+      scores.push({ name: player, score });
+      scores = scores.sort((a, b) => b.score - a.score).slice(0, 5);
+      localStorage.setItem("foodmonScores", JSON.stringify(scores));
+
+      const ul = document.getElementById("localScores");
+      ul.innerHTML = "";
+      scores.forEach((s, i) => {
+        const li = document.createElement("li");
+        li.textContent = `${i + 1}. ${s.name} - ${s.score}`;
+        ul.appendChild(li);
+      });
+    }
+
+    function resetScore() {
+      if (player) updateLocalLeaderboard();
+      score = 0;
+      foodDrops.length = 0;
+      fryDrops.length = 0;
+      document.getElementById("gameScore").innerText = `🍽️ Score: 0`;
+    }
+
+    function startGame() {
+      const nameInput = document.getElementById("playerName").value.trim();
+      if (!nameInput) return alert("Please enter a name!");
+      player = nameInput;
+      document.getElementById("nameModal").style.display = "none";
+      gameLoop();
+    }
   </script>
 </body>
 </html>
+
 
 
 
