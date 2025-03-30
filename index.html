@@ -192,7 +192,7 @@
   <div id="nameModal">
     <h2>Enter Your Name to Start</h2>
     <input id="playerName" placeholder="Your Name"/>
-    <button onclick="startGame()">Start Game</button>
+    <button id="startBtn">Start Game</button>
   </div>
 
   <canvas id="gameCanvas"></canvas>
@@ -438,9 +438,13 @@
     }
 
     fetchLeaderboard();
+
+    // Fix: Hook up start button event after DOM loads
+    document.getElementById("startBtn").addEventListener("click", startGame);
   </script>
 </body>
 </html>
+
 
 
 
