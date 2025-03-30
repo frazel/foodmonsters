@@ -440,7 +440,10 @@
     fetchLeaderboard();
 
     // Fix: Hook up start button event after DOM loads
-    document.getElementById("startBtn").addEventListener("click", startGame);
+window.onload = () => {
+  document.getElementById("startBtn").addEventListener("click", startGame);
+};
+
   </script>
 </body>
 </html>
