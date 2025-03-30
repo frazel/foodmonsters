@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FoodMonsters Dodge Game</title>
+  <title>FoodMon Frenzy Leaderboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
   <style>
     html, body {
@@ -141,12 +141,12 @@
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
-  <div id="gameScore">🍟 Score: 0</div>
+  <div id="gameScore">🍽️ Score: 0</div>
 
   <header>
     <img src="https://i.imgur.com/Xveg60R.png" alt="FoodMonsters Logo">
-    <h1>🍽️ FoodMonsters Dodge the Fry Samurai 🍟</h1>
-    <p>Avoid the falling fries!</p>
+    <h1>🍽️ FoodMon Frenzy 🍟</h1>
+    <p>Catch food, dodge fries. Stay hungry!</p>
   </header>
 
   <main>
@@ -163,46 +163,23 @@
   </footer>
 
   <script>
-    const blacklist = [
-      "waxdaofarmer", "waxdaomarket", "wombatmaster", "nfthivepacks",
-      "blend.nefty", "swap.taco", "scurvybot.gm", "swap.alcor", "neftyblocksp", "neftyblocksd",
-      "wallet.taco", "waxportalbot", "x", "wallets", "dig.sb"
-    ];
-
+    // Leaderboard logic
+    const blacklist = ["waxdaofarmer", "waxdaomarket", "wombatmaster", "nfthivepacks","blend.nefty", "swap.taco", "scurvybot.gm", "swap.alcor", "neftyblocksp", "neftyblocksd","wallet.taco", "waxportalbot", "x", "wallets", "dig.sb"];
     let leaderboardData = [];
 
     async function fetchLeaderboard() {
       const response = await fetch('https://wax.api.atomicassets.io/atomicassets/v1/accounts?collection_name=foodmonsters&limit=1000');
       const data = await response.json();
-
-      const sorted = data.data
-        .filter(entry => entry.account && entry.assets > 0 && !blacklist.includes(entry.account))
-        .sort((a, b) => b.assets - a.assets)
-        .slice(0, 100);
-
+      const sorted = data.data.filter(entry => entry.account && entry.assets > 0 && !blacklist.includes(entry.account)).sort((a, b) => b.assets - a.assets).slice(0, 100);
       leaderboardData = sorted;
-
       const list = document.getElementById('leaderboard-list');
       list.innerHTML = '';
-
       sorted.forEach((entry, index) => {
-        const li = document.createElement('li');
-        let medal = '';
-        let emoji = '';
-
-        if (index === 0) {
-          medal = '👑 ';
-          emoji = '🍕';
-        } else if (index === 1) {
-          medal = '🥈 ';
-          emoji = '🍔';
-        } else if (index === 2) {
-          medal = '🥉 ';
-          emoji = '🍩';
-        }
-
+        const medal = index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+        const emoji = index === 0 ? '🍕' : index === 1 ? '🍔' : index === 2 ? '🍩' : '';
         const link = `https://wax.atomichub.io/profile/${entry.account}`;
-        li.innerHTML = `${medal}${emoji ? `<span class="emoji">${emoji}</span>` : ''} #${index + 1} - <a href="${link}" target="_blank">${entry.account}</a> (${entry.assets} NFTs)`;
+        const li = document.createElement('li');
+        li.innerHTML = `${medal} ${emoji} #${index + 1} - <a href="${link}" target="_blank">${entry.account}</a> (${entry.assets} NFTs)`;
         list.appendChild(li);
       });
     }
@@ -212,7 +189,6 @@
       leaderboardData.forEach((entry, index) => {
         csv += `${index + 1},${entry.account},${entry.assets}\n`;
       });
-
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -226,10 +202,19 @@
 
     fetchLeaderboard();
 
-    // 🎮 Game Setup: Dodge falling Fry Samurais
+    // Game logic
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     let width, height;
+    let score = 0;
+    let plateX = 300;
+    const plateWidth = 60;
+
+    const foodEmojis = ["🍕", "🍔", "🍩", "🌭", "🍟"];
+    const foodDrops = [];
+    const fryDrops = [];
+    const fryImg = new Image();
+    fryImg.src = "https://i.imgur.com/Xveg60R.png";
 
     function resizeCanvas() {
       width = window.innerWidth;
@@ -237,17 +222,8 @@
       canvas.width = width;
       canvas.height = height;
     }
-
-    window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
-
-    let plateX = width / 2;
-    const plateWidth = 60;
-    let score = 0;
-    let fryImg = new Image();
-    fryImg.src = "https://i.imgur.com/Xveg60R.png";
-
-    let fryRain = [];
+    window.addEventListener("resize", resizeCanvas);
 
     document.addEventListener("keydown", e => {
       if (e.key === "ArrowLeft") plateX -= 40;
@@ -258,33 +234,58 @@
       plateX = e.clientX - plateWidth / 2;
     });
 
-    function spawnFry() {
-      if (Math.random() < 0.07) {
-        fryRain.push({
-          x: Math.random() * (width - 60),
-          y: -40,
+    function spawnFoodAndFries() {
+      if (Math.random() < 0.08) {
+        foodDrops.push({
+          emoji: foodEmojis[Math.floor(Math.random() * foodEmojis.length)],
+          x: Math.random() * (width - 40),
+          y: -30,
+          speed: 2 + score * 0.05
+        });
+      }
+
+      if (Math.random() < 0.02 + score * 0.0015) {
+        fryDrops.push({
+          x: Math.random() * (width - 40),
+          y: -30,
           speed: 2 + score * 0.1
         });
       }
     }
 
-    function drawFry() {
-      for (let i = 0; i < fryRain.length; i++) {
-        const fry = fryRain[i];
-        ctx.drawImage(fryImg, fry.x, fry.y, 40, 40);
-        fry.y += fry.speed;
+    function drawFood() {
+      for (let i = 0; i < foodDrops.length; i++) {
+        const f = foodDrops[i];
+        ctx.font = "32px serif";
+        ctx.fillText(f.emoji, f.x, f.y);
+        f.y += f.speed;
 
-        // Hit detection
-        if (fry.y > height - 60 && fry.x > plateX && fry.x < plateX + 60) {
-          fryRain = []; // Clear all fries
-          score = 0;
-          document.getElementById("gameScore").innerText = `🍟 Score: 0`;
-          i--;
-        } else if (fry.y > height) {
-          fryRain.splice(i, 1);
-          i--;
+        if (f.y > height - 60 && f.x > plateX && f.x < plateX + plateWidth) {
           score++;
-          document.getElementById("gameScore").innerText = `🍟 Score: ${score}`;
+          foodDrops.splice(i, 1);
+          document.getElementById("gameScore").innerText = `🍽️ Score: ${score}`;
+          i--;
+        } else if (f.y > height) {
+          foodDrops.splice(i, 1);
+          i--;
+        }
+      }
+    }
+
+    function drawFries() {
+      for (let i = 0; i < fryDrops.length; i++) {
+        const f = fryDrops[i];
+        ctx.drawImage(fryImg, f.x, f.y, 40, 40);
+        f.y += f.speed;
+
+        if (f.y > height - 60 && f.x > plateX && f.x < plateX + plateWidth) {
+          score = 0;
+          fryDrops.length = 0;
+          foodDrops.length = 0;
+          document.getElementById("gameScore").innerText = `🍽️ Score: 0`;
+        } else if (f.y > height) {
+          fryDrops.splice(i, 1);
+          i--;
         }
       }
     }
@@ -296,8 +297,9 @@
 
     function gameLoop() {
       ctx.clearRect(0, 0, width, height);
-      spawnFry();
-      drawFry();
+      spawnFoodAndFries();
+      drawFood();
+      drawFries();
       drawPlate();
       requestAnimationFrame(gameLoop);
     }
@@ -306,6 +308,7 @@
   </script>
 </body>
 </html>
+
 
 
 
