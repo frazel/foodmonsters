@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FoodMonsters Login Test</title>
+  <title>FoodMonsters WAX Login Debug</title>
   <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@waxio/waxjs/dist/waxjs.js"></script>
   <style>
@@ -45,7 +45,7 @@
   </style>
 </head>
 <body>
-  <h1>🍕 FoodMonsters WAX Login Test 🍔</h1>
+  <h1>🍕 FoodMonsters WAX Login Debug 🍔</h1>
   <button onclick="loginWithWAX()">Login with WAX Cloud Wallet</button>
   <div id="user"></div>
 
@@ -56,19 +56,26 @@
     });
 
     async function loginWithWAX() {
-      if (wax.userAccount) {
-        document.getElementById('user').innerText = `Logged in as: ${wax.userAccount}`;
-        return;
-      }
+      console.log('Login button clicked');
 
       try {
+        const autoLoginAvailable = await wax.isAutoLoginAvailable();
+        console.log('Auto login available:', autoLoginAvailable);
+
+        if (autoLoginAvailable) {
+          document.getElementById('user').innerText = `Logged in as: ${wax.userAccount}`;
+          return;
+        }
+
         const userAccount = await wax.login();
+        console.log('WAX login successful:', userAccount);
         document.getElementById('user').innerText = `Logged in as: ${userAccount}`;
       } catch (err) {
         console.error('WAX login failed:', err);
-        alert('Make sure you are logged in at https://wallet.wax.io!');
+        alert('WAX login failed. Are you logged in at https://wallet.wax.io?');
       }
     }
   </script>
 </body>
 </html>
+
