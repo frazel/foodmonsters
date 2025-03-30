@@ -24,14 +24,17 @@
       position: fixed;
       top: 0;
       left: 0;
-      z-index: 0;
+      z-index: 1;
       pointer-events: none;
     }
 
-    header, footer {
+    header, footer, main {
       position: relative;
       z-index: 2;
       text-align: center;
+    }
+
+    header {
       padding: 2rem;
       background-color: rgba(255, 184, 77, 0.9);
       box-shadow: 0 0 12px #ffbf00aa;
@@ -54,8 +57,6 @@
     }
 
     main {
-      position: relative;
-      z-index: 2;
       padding: 2rem;
       text-align: center;
     }
@@ -109,7 +110,7 @@
 
     footer {
       font-size: 0.9rem;
-      z-index: 2;
+      padding-bottom: 2rem;
     }
 
     footer a {
@@ -225,7 +226,7 @@
 
     fetchLeaderboard();
 
-    // 🎮 Mini Game Logic 🍔
+    // 🎮 Mini Game Logic
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     let width, height;
@@ -241,8 +242,7 @@
     resizeCanvas();
 
     let plateX = width / 2;
-    const plateWidth = 100;
-    const plateHeight = 20;
+    const plateWidth = 80;
     let score = 0;
     let food = [];
     const foodEmojis = ["🍕", "🍔", "🍩", "🍟", "🌭"];
@@ -250,6 +250,10 @@
     document.addEventListener("keydown", e => {
       if (e.key === "ArrowLeft") plateX -= 30;
       if (e.key === "ArrowRight") plateX += 30;
+    });
+
+    document.addEventListener("mousemove", e => {
+      plateX = e.clientX - plateWidth / 2;
     });
 
     function spawnFood() {
@@ -270,16 +274,12 @@
         ctx.fillText(f.emoji, f.x, f.y);
         f.y += f.speed;
 
-        // Collision with plate
-        if (f.y > height - plateHeight - 10 && f.x > plateX && f.x < plateX + plateWidth) {
+        if (f.y > height - 40 && f.x > plateX && f.x < plateX + 60) {
           food.splice(i, 1);
           score++;
           document.getElementById("gameScore").innerText = `🍔 Score: ${score}`;
           i--;
-        }
-
-        // Missed food
-        else if (f.y > height) {
+        } else if (f.y > height) {
           food.splice(i, 1);
           i--;
         }
@@ -287,8 +287,8 @@
     }
 
     function drawPlate() {
-      ctx.fillStyle = "#fcbf49";
-      ctx.fillRect(plateX, height - plateHeight, plateWidth, plateHeight);
+      ctx.font = "60px serif";
+      ctx.fillText("🍽️", plateX, height - 10);
     }
 
     function gameLoop() {
@@ -303,4 +303,5 @@
   </script>
 </body>
 </html>
+
 
