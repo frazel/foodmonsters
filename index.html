@@ -3,98 +3,185 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FoodMonsters Leaderboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+  <title>FoodMonsters NFT Leaderboard</title>
+  <link href="https://fonts.googleapis.com/css22?family=Chewy&display=swap" rel="stylesheet">
   <style>
-    body {
+    html, body {
       margin: 0;
-      font-family: 'Luckiest Guy', cursive;
-      background: linear-gradient(135deg, #111, #222);
-      color: #fff;
+      font-family: 'Chewy', cursive;
+      color: #fffbea;
+      background-color: #121212;
       overflow-x: hidden;
+      scroll-behavior: smooth;
+      cursor: url('https://cur.cursors-4u.net/food/foo-6/foo520.cur'), auto;
     }
+
+    body {
+      background: url('https://www.transparenttextures.com/patterns/food.png') repeat;
+      background-size: 400px;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('https://i.imgur.com/pDnpPSf.gif') repeat;
+      opacity: 0.1;
+      pointer-events: none;
+      z-index: 0;
+      animation: foodGlitter 20s linear infinite;
+    }
+
+    @keyframes foodGlitter {
+      0% { opacity: 0.07; }
+      50% { opacity: 0.12; }
+      100% { opacity: 0.07; }
+    }
+
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0); }
+    }
+
+    .emoji {
+      display: inline-block;
+      animation: bounce 0.5s infinite ease-in-out alternate;
+    }
+
     header, footer {
+      position: relative;
+      z-index: 1;
       text-align: center;
       padding: 2rem;
-      background-color: #1a1a1a;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      background-color: rgba(255, 184, 77, 0.9);
+      box-shadow: 0 0 12px #ffbf00aa;
+      color: #301f00;
     }
+
     header h1 {
       font-size: 3rem;
-      color: #ffde59;
-      text-shadow: 2px 2px 4px #000;
+      text-shadow: 2px 2px 0 #ffcf40;
     }
+
+    header img {
+      width: 140px;
+      margin-bottom: 1rem;
+      transition: transform 0.3s ease;
+    }
+
+    header img:hover {
+      transform: scale(1.1) rotate(-2deg);
+    }
+
     main {
+      position: relative;
+      z-index: 1;
       padding: 2rem;
       text-align: center;
     }
+
     #leaderboard-list {
-      max-width: 600px;
+      max-width: 700px;
       margin: 2rem auto;
       list-style: none;
       padding: 0;
       text-align: left;
-      background-color: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
       overflow: hidden;
+      backdrop-filter: blur(6px);
     }
+
     #leaderboard-list li {
       padding: 1rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: background 0.3s ease, transform 0.2s ease;
     }
+
+    #leaderboard-list li:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      transform: scale(1.01) translateY(-2px);
+    }
+
     #leaderboard-list li:nth-child(odd) {
-      background-color: rgba(255, 255, 255, 0.02);
+      background-color: rgba(255, 255, 255, 0.04);
     }
-    footer {
-      font-size: 0.9rem;
-      color: #ccc;
-    }
+
     .download-btn {
-      background: #ffde59;
-      color: #111;
+      background: #fcbf49;
+      color: #4a3200;
       border: none;
       padding: 10px 20px;
       font-size: 1rem;
       font-weight: bold;
       border-radius: 8px;
       cursor: pointer;
-      margin-top: 20px;
+      margin: 10px 0;
+      box-shadow: 0 0 10px #ffcb6b;
+      transition: all 0.2s ease;
     }
+
     .download-btn:hover {
-      background: #ffe985;
+      background: #ffdd7b;
+      box-shadow: 0 0 20px #ffe088;
+      transform: translateY(-2px);
     }
+
     a {
-      color: #ff4f4f;
+      color: #ffeecb;
       text-decoration: none;
+      transition: color 0.2s ease;
     }
+
     a:hover {
       text-decoration: underline;
+      color: #ffffff;
+    }
+
+    footer {
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: #ffea8d;
+      text-decoration: none;
+      font-size: 1rem;
+      display: inline-block;
+      margin-top: 0.5rem;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+      color: #fff;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>🍕 FoodMonsters Top Holders 🍔</h1>
-    <p>These are the top 100 holders of FoodMonsters NFTs — accurate and updated live!</p>
+    <img src="https://i.imgur.com/Xveg60R.png" alt="FoodMonsters Logo">
+    <h1>🍕 FoodMonsters NFT Leaderboard 🍔</h1>
+    <p>Top Tastebud Titans</p>
   </header>
 
   <main>
     <section id="leaderboard">
-      <h2>Top 100 Holders</h2>
+      <h2>Top 100 FoodMonsters Collectors</h2>
       <button class="download-btn" onclick="downloadCSV()">📥 Download CSV</button>
-      <ol id="leaderboard-list"><li>Loading...</li></ol>
+      <ol id="leaderboard-list"><li>Serving up fresh stats...</li></ol>
     </section>
   </main>
 
   <footer>
-    <p>Made with 🍟 and ❤️ by FoodMonsters</p>
+    <p>Cooked up with flavor by The Online Inn 🧁</p>
+    <a href="https://discord.gg/cEkJyyK" target="_blank">Join the Feast 🍟</a>
   </footer>
 
   <script>
     const blacklist = [
       "waxdaofarmer", "waxdaomarket", "wombatmaster", "nfthivepacks",
-      "blend.nefty", "swap.taco", "scurvybot.gm", "swap.alcor",
-      "wallet.taco", "waxportalbot", "x", "neftyblocksd", "neftyblocksp", "neftyblocksd", "atomictoolsx", "wallets", "dig.sb"
+      "blend.nefty", "swap.taco", "scurvybot.gm", "swap.alcor", "neftyblocksp", "neftyblocksd",
+      "wallet.taco", "waxportalbot", "x", "wallets", "dig.sb"
     ];
 
     let leaderboardData = [];
@@ -116,12 +203,21 @@
       sorted.forEach((entry, index) => {
         const li = document.createElement('li');
         let medal = '';
-        if (index === 0) medal = '🥇 ';
-        else if (index === 1) medal = '🥈 ';
-        else if (index === 2) medal = '🥉 ';
+        let emoji = '';
+
+        if (index === 0) {
+          medal = '👑 ';
+          emoji = '<span class="emoji">🍕</span>';
+        } else if (index === 1) {
+          medal = '🥈 ';
+          emoji = '<span class="emoji">🍔</span>';
+        } else if (index === 2) {
+          medal = '🥉 ';
+          emoji = '<span class="emoji">🍩</span>';
+        }
 
         const link = `https://wax.atomichub.io/profile/${entry.account}`;
-        li.innerHTML = `${medal}#${index + 1} - <a href="${link}" target="_blank">${entry.account}</a> (${entry.assets} NFTs)`;
+        li.innerHTML = `${medal}${emoji} #${index + 1} - <a href="${link}" target="_blank">${entry.account}</a> (${entry.assets} NFTs)`;
         list.appendChild(li);
       });
     }
@@ -147,3 +243,4 @@
   </script>
 </body>
 </html>
+
