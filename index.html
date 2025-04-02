@@ -331,7 +331,7 @@
 function drawFries() {
   for (let i = 0; i < fryDrops.length; i++) {
     const f = fryDrops[i];
-    ctx.drawImage(fryImg, f.x, f.y, 60, 60); // bigger fries!
+    ctx.drawImage(fryImg, f.x, f.y, 60, 60);
     f.y += f.speed;
 
     const plateTop = height - 100;
@@ -342,11 +342,17 @@ function drawFries() {
     const fryLeft = f.x;
     const fryRight = f.x + 60;
 
-    const plateLeft = plateX;
-    const plateRight = plateX + plateWidth;
+    // Shrink plate hitbox inward for forgiveness
+    const paddingX = 10; // horizontal forgiveness
+    const paddingY = 10; // vertical forgiveness
+
+    const plateLeft = plateX + paddingX;
+    const plateRight = plateX + plateWidth - paddingX;
+    const hitTop = plateTop + paddingY;
+    const hitBottom = plateBottom - paddingY;
 
     const isHorizontallyAligned = fryRight >= plateLeft && fryLeft <= plateRight;
-    const isVerticallyTouchingTop = fryBottom >= plateTop && fryTop <= plateTop;
+    const isVerticallyTouchingTop = fryBottom >= hitTop && fryTop <= hitBottom;
 
     if (isHorizontallyAligned && isVerticallyTouchingTop) {
       resetScore();
@@ -356,6 +362,7 @@ function drawFries() {
     }
   }
 }
+
 
 
     function drawPlate() {
